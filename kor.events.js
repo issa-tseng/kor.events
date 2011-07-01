@@ -39,7 +39,7 @@
         if (isUndefined(subject))
         {
             // add to global verb events registry
-            getArrayKey(byVerb, verb).push(eventSignature);
+            getArrayForKey(byVerb, verb).push(eventSignature);
         }
         else
         {
@@ -47,7 +47,7 @@
             var subjectKey = getSubjectKey(subject);
             isUndefined(bySubject[subjectKey]) &&
                 (bySubject[subjectKey] = {});
-            getArrayKey(bySubject[subjectKey], verb).push(eventSignature);
+            getArrayForKey(bySubject[subjectKey], verb).push(eventSignature);
         }
     };
 
@@ -90,7 +90,7 @@
 
     // creates an array at the key if it does not exist;
     // returns the array whether created or not.
-    var getArrayKey = function(obj, key)
+    var getArrayForKey = function(obj, key)
     {
         var result;
         isUndefined(result = obj[key]) &&
