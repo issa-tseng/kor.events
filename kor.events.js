@@ -10,20 +10,46 @@
 // internal data structures
     var byVerb = {},
         bySubject = {},
-        subjects = {};
+        subjects = {},
+        serialId = 0;
 
 // base object and methods
     var korevents = {};
 
     korevents['listen'] = function(options)
     {
+        // pull out everything we might need up front
         var subject = options['subject'],
             verb = options['verb'],
-            args = options['args'],
+            args = clone(options['args']),
+            priority = options['priority'],
             callback = options['callback'];
+
+        // construct our own, in case
+        var eventSignature = {
+            subject: subject,
+            verb: verb,
+            priority: priority,
+            args: args
+        };
+
+        // determine secondary priority (TODO: this iters twice)
+        eventSignature['priority2'] = keyCount(args);
+
+        if (isUndefined(subject))
+        {
+            // add to global events registry
+            getArrayKey(byVerb, verb).push(eventSignature);
+        }
+        else
+        {
+            // add to subject-specific events registry
+            var subjectKey = getSubjectKey(subject);
+            getArrayKey(byVerb[subjectKey], verb).push(eventSignature);
+        }
     };
 
-    korevents['fire'] = function(options)
+    var fire = korevents['fire'] = function(options)
     {
         var subject = options['subject'],
             verb = options['verb'],
@@ -37,6 +63,48 @@
 
 // utility
     var isUndefined = function(obj) { return obj === void 0; };
+    var isArray = function(obj) { return toString.call(obj) === '[object Array]'; };
+
+    // counts keys on obj
+    var keyCount = function(obj)
+    {
+        var result = 0;
+        for (var key in obj)
+            result++;
+        return result;
+    };
+
+    // shallow copies an obj/array
+    var clone = function(obj)
+    {
+        if (isArray(obj))
+            return obj.slice();
+
+        var result = {};
+        for (var key in obj)
+            result[key] = obj[key];
+        return result;
+    };
+
+    // creates an array at the key if it does not exist;
+    // returns the array whether created or not.
+    var getArrayKey = function(obj, key)
+    {
+        var result;
+        isUndefined(result = obj[key]) &&
+            (result = obj[key] = []);
+        return result;
+    };
+
+    // creates a subject key if it does not exist; returns
+    // the key whether created or not.
+    var getSubjectKey = function(subject)
+    {
+        var result;
+        isUndefined(result = subject['_kor_events_key']) &&
+            (result = subject['_kor_events_key'] = serialId++);
+        return result;
+    };
 
 // setup!
     var root = this;
