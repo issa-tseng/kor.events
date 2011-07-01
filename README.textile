@@ -17,7 +17,7 @@ h3. @kor.events.listen(options)@
 @options@ here consists of four potential arguments:
 * @subject@: an object to listen to. Note that kor.events will add a @_kor_events_id@ key to the object for performance reasons. _(optional)_
 * @verb@: a string representing the type of action that was performed. _(required)_
-* @opts@: a hash containing additional specifiers about the event to listen on. _(optional)_
+* @args@: a hash containing additional specifiers about the event to listen on. _(optional)_
 * @callback@: the function to call back to when a matching event fires. _(required)_
 
 The callback will be given a single argument, which looks a lot like the @options@ hash, but will give all the criteria that the event firer specifies in relation to the event.
@@ -26,7 +26,7 @@ h3. @kor.events.fire(options)@
 
 Looks much like the options given on @listen@. The only difference is that a @callback@ is not given.
 
-h3. @kor.events.destruct(subject)@
+h3. @kor.events.derez(subject)@
 
 Marks that the @subject@ is about to be eradicated. This does a couple of things:
 * Fires an event with @verb@ of @"destruct"@ and @subject@ of the @subject@ so that any listeners that are tracking the object can know to clean up after it.
