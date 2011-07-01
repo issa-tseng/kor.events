@@ -38,14 +38,16 @@
 
         if (isUndefined(subject))
         {
-            // add to global events registry
+            // add to global verb events registry
             getArrayKey(byVerb, verb).push(eventSignature);
         }
         else
         {
             // add to subject-specific events registry
             var subjectKey = getSubjectKey(subject);
-            getArrayKey(byVerb[subjectKey], verb).push(eventSignature);
+            isUndefined(bySubject[subjectKey]) &&
+                (bySubject[subjectKey] = {});
+            getArrayKey(bySubject[subjectKey], verb).push(eventSignature);
         }
     };
 
