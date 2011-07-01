@@ -15,7 +15,7 @@ The system lives under the kor.events namespace. There are three primary methods
 h3. @kor.events.listen(options)@
 
 @options@ here consists of four potential arguments:
-* @subject@: an object to listen to. Note that kor.events will add a _kor_events_id key to the object for performance reasons. _(optional)_
+* @subject@: an object to listen to. Note that kor.events will add a @_kor_events_id@ key to the object for performance reasons. _(optional)_
 * @verb@: a string representing the type of action that was performed. _(required)_
 * @opts@: a hash containing additional specifiers about the event to listen on. _(optional)_
 * @callback@: the function to call back to when a matching event fires. _(required)_
