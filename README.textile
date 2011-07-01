@@ -1,0 +1,42 @@
+h1. kor.events
+
+A little microframework for a couple of projects I'm working on. As with all my *kor.* projects, this is mostly something I'm writing for my own use and don't really intend to publicly support, but feel free to fork, update, and contribute anyway if you're feeling adventurous.
+
+h2. principles
+
+Essentially, the idea is to be able to subscribe to a global events system based on criteria matching, rather than being DOM- or object-based.
+
+Every event you can fire in the system consists of a *subject* (any JS object), a *verb* (a string indicating the action), and a hash that comprises additional specifiers (an *object*, if you will). You can subscribe to events based on matching criteria on any or all of the three; the only requirement is that you must specify a verb to listen to.
+
+h2. syntax
+
+The system lives under the kor.events namespace. There are three primary methods associated with it:
+
+h3. @kor.events.listen(options)@
+
+@options@ here consists of four potential arguments:
+* @subject@: an object to listen to. Note that kor.events will add a _kor_events_id key to the object for performance reasons. _(optional)_
+* @verb@: a string representing the type of action that was performed. _(required)_
+* @opts@: a hash containing additional specifiers about the event to listen on. _(optional)_
+* @callback@: the function to call back to when a matching event fires. _(required)_
+
+The callback will be given a single argument, which looks a lot like the @options@ hash, but will give all the criteria that the event firer specifies in relation to the event.
+
+h3. @kor.events.fire(options)@
+
+Looks much like the options given on @listen@. The only difference is that a @callback@ is not given.
+
+h3. @kor.events.destruct(subject)@
+
+Marks that the @subject@ is about to be eradicated. This does a couple of things:
+* Fires an event with @verb@ of @"destruct"@ and @subject@ of the @subject@ so that any listeners that are tracking the object can know to clean up after it.
+* Removes the @subject@ from kor.events internal tracking.
+
+h2. unit tests
+
+Get @jasmine-node@ from @npm@. Run @jasmine-node spec@.
+
+h2. licensing
+
+As with everything I write, everything here is licensed under the "WTFPL":http://sam.zoy.org/wtfpl, but I request that you let me know what you think of it all.
+
