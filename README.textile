@@ -29,7 +29,7 @@ Looks much like the options given on @listen@. The only difference is that a @ca
 h3. @kor.events.derez(subject)@
 
 Marks that the @subject@ is about to be eradicated. This does a couple of things:
-* Fires an event with @verb@ of @"destruct"@ and @subject@ of the @subject@ so that any listeners that are tracking the object can know to clean up after it.
+* Fires an event with @verb@ of @"derez"@ and @subject@ of the @subject@ so that any listeners that are tracking the object can know to clean up after it.
 * Removes the @subject@ from kor.events internal tracking.
 
 h2. unit tests
