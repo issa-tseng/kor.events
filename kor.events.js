@@ -9,9 +9,12 @@
 {
 // internal data structures
     var byVerb = {},
+        byArg = {},
         bySubject = {},
+        bySubjectAndArg = {},
         subjects = {},
-        serialId = 0;
+        subjectSerialId = 0,
+        eventSerialId = 0;
 
 // base object and methods
     var korevents = {};
@@ -27,27 +30,36 @@
 
         // construct our own, in case
         var eventSignature = {
-            subject: subject,
-            verb: verb,
-            priority: priority,
-            args: args
+            s: subject,
+            v: verb,
+            p: priority,
+            a: args,
+            i: eventSerialId++
         };
-
-        // determine secondary priority (TODO: this iters twice)
-        eventSignature['priority2'] = keyCount(args);
 
         if (isUndefined(subject))
         {
             // add to global verb events registry
             getArrayForKey(byVerb, verb).push(eventSignature);
+
+            // go through args; add to global args registry
+            if (!isUndefined(args))
+                for (var key in args)
+                    getArrayForKey(byArg, key).push(eventSignature);
         }
         else
         {
             // add to subject-specific events registry
             var subjectKey = getSubjectKey(subject);
-            isUndefined(bySubject[subjectKey]) &&
-                (bySubject[subjectKey] = {});
-            getArrayForKey(bySubject[subjectKey], verb).push(eventSignature);
+            getArrayForKey(getObjectForKey(bySubject, subjectKey), verb).push(eventSignature);
+
+            // go through args; add to subject-specific args registry
+            if (!isUndefined(args))
+            {
+                var subjectRegistry = getObjectForKey(bySubject, subjectKey);
+                for (var key in args)
+                    getArrayForKey(subjectRegistry, key).push(eventSignature);
+            }
         }
     };
 
@@ -67,24 +79,27 @@
     var isUndefined = function(obj) { return obj === void 0; };
     var isArray = function(obj) { return toString.call(obj) === '[object Array]'; };
 
-    // counts keys on obj
-    var keyCount = function(obj)
-    {
-        var result = 0;
-        for (var key in obj)
-            result++;
-        return result;
-    };
-
     // shallow copies an obj/array
     var clone = function(obj)
     {
+        if (isUndefined(obj))
+            return undefined;
         if (isArray(obj))
             return obj.slice();
 
         var result = {};
         for (var key in obj)
             result[key] = obj[key];
+        return result;
+    };
+
+    // creates an object at the key if it does not exist;
+    // returns the object whether created or not.
+    var getObjectForKey = function(obj, key)
+    {
+        var result;
+        isUndefined(result = obj[key]) &&
+            (result = obj[key] = {});
         return result;
     };
 
@@ -104,7 +119,7 @@
     {
         var result;
         isUndefined(result = subject['_kor_events_key']) &&
-            (result = subject['_kor_events_key'] = serialId++);
+            (result = subject['_kor_events_key'] = subjectSerialId++);
         return result;
     };
 
