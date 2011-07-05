@@ -34,7 +34,8 @@
             v: verb,
             p: priority,
             a: args,
-            i: eventSerialId++
+            i: eventSerialId++,
+            c: callback
         };
 
         if (isUndefined(subject))
@@ -56,9 +57,9 @@
             // go through args; add to subject-specific args registry
             if (!isUndefined(args))
             {
-                var subjectRegistry = getObjectForKey(bySubject, subjectKey);
-                for (var key in args)
-                    getArrayForKey(subjectRegistry, key).push(eventSignature);
+                var subjectArgRegistry = getObjectForKey(getObjectForKey(bySubjectAndArg, subjectKey), verb);
+                for (var arg in args)
+                    getArrayForKey(subjectArgRegistry, arg).push(eventSignature);
             }
         }
     };
@@ -68,11 +69,81 @@
         var subject = options['subject'],
             verb = options['verb'],
             args = options['args'];
+
+        // keep track of what registrations we've already determined won't fire.
+        var invalid = {};
+        var priority = {};
+
+        // first, look at global subscribers to this verb
+        var globalSubscribers = clone(getArrayForKey(byVerb, verb));
+        if (!isUndefined(args))
+            checkArgs(byArg, args, invalid, priority);
+
+        // next, look at subject subscribers to the verb
+        var subjectKey = getSubjectKey(subject);
+        var subjectSubscribers = clone(getArrayForKey(getObjectForKey(bySubject, subjectKey), verb));
+        var subjectArgRegistry = getObjectForKey(getObjectForKey(bySubjectAndArg, subjectKey), verb);
+        if (!isUndefined(args))
+            checkArgs(subjectArgRegistry, args, invalid, priority);
+
+        // join, sort
+        var allSubscribers = globalSubscribers.concat(subjectSubscribers);
+        allSubscribers.sort(function(a, b)
+        {
+            var result;
+            if ((result = (a['p'] || 0) - (b['p'] || 0)) !== 0)
+                return result;
+            return (priority[a['i']] || 0) - (priority[b['i']] || 0);
+        });
+
+        // call
+        var result = true;
+        for (var i = 0; i < allSubscribers.length; i++)
+        {
+            if (invalid[allSubscribers[i]['i']])
+                continue;
+
+            if (allSubscribers[i]['c'](options) === false)
+            {
+                result = false;
+                break;
+            }
+        }
+        return result;
     };
 
     korevents['derez'] = function(options)
     {
         var subject = options['subject'];
+    };
+
+// helper
+    var checkArgs = function(byArg, args, invalid, priority)
+    {
+        for (var arg in args)
+        {
+            var argRegistry = byArg[arg],
+                argValue = args[arg];
+
+            if (!isUndefined(argRegistry))
+            {
+                for (var i = 0; i < argRegistry.length; i++)
+                {
+                    // check validity
+                    var registeredEvent = argRegistry[i];
+                    if (registeredEvent['a'][arg] !== argValue)
+                    {
+                        invalid[registeredEvent['i']] = true;
+                        continue;
+                    }
+
+                    // init and incr priority for this registry
+                    if (isUndefined(priority[registeredEvent['i']]))
+                        priority[registeredEvent['i']] = 0;
+                    priority[registeredEvent['i']]++;
+                }
+            }
+        }
     };
 
 // utility
