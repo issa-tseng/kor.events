@@ -112,9 +112,14 @@
         return result;
     };
 
-    korevents['derez'] = function(options)
+    korevents['derez'] = function(subject)
     {
-        var subject = options['subject'];
+        fire({
+            subject: subject,
+            verb: 'derez'
+        });
+
+        delete byVerb[subject['i']];
     };
 
 // helper
