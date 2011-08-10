@@ -8,10 +8,8 @@
 ;(function()
 {
 // internal data structures
-    var byVerb = {},
-        byArg = {},
+    var byVerb = { all: {}, arg: {} },
         bySubject = {},
-        bySubjectAndArg = {},
         subjects = {},
         subjectSerialId = 0,
         eventSerialId = 0;
@@ -28,40 +26,32 @@
             priority = options['priority'],
             callback = options['callback'];
 
-        // construct our own, in case
+        // construct our own, just in case
+        var id = eventSerialId++;
         var eventSignature = {
-            s: subject,
-            v: verb,
-            p: priority,
-            a: args,
-            i: eventSerialId++,
-            c: callback
+            's': subject,
+            'v': verb,
+            'p': priority,
+            'a': args,
+            'i': id,
+            'c': callback
         };
 
+        var targetRegistry;
         if (isUndefined(subject))
-        {
-            // add to global verb events registry
-            getArrayForKey(byVerb, verb).push(eventSignature);
-
-            // go through args; add to global args registry
-            if (!isUndefined(args))
-                for (var key in args)
-                    getArrayForKey(byArg, key).push(eventSignature);
-        }
+            // no subject; just add to the global registry
+            targetRegistry = byVerb;
         else
-        {
-            // add to subject-specific events registry
-            var subjectKey = getSubjectKey(subject);
-            getArrayForKey(getObjectForKey(bySubject, subjectKey), verb).push(eventSignature);
+            // add to the subject-specific registry
+            targetRegistry = getObjectForKey(bySubject, getSubjectKey(subject));
 
-            // go through args; add to subject-specific args registry
-            if (!isUndefined(args))
-            {
-                var subjectArgRegistry = getObjectForKey(getObjectForKey(bySubjectAndArg, subjectKey), verb);
-                for (var arg in args)
-                    getArrayForKey(subjectArgRegistry, arg).push(eventSignature);
-            }
-        }
+        // go through args; add to global/verb args registry
+        if (!isUndefined(args))
+            for (var arg in args)
+                getObjectForKey(targetRegistry.arg, arg)[id] = eventSignature;
+
+        // add to global verb events registry
+        getObjectForKey(targetRegistry.all, id) = eventSignature;
     };
 
     var fire = korevents['fire'] = function(options)
@@ -173,19 +163,21 @@
     // returns the object whether created or not.
     var getObjectForKey = function(obj, key)
     {
-        var result;
-        isUndefined(result = obj[key]) &&
-            (result = obj[key] = {});
-        return result;
+        return getXForKey(obj, key, {});
     };
 
     // creates an array at the key if it does not exist;
     // returns the array whether created or not.
     var getArrayForKey = function(obj, key)
     {
+        return getXForKey(obj, key, []);
+    };
+
+    var getXForKey = function(obj, key, x)
+    {
         var result;
         isUndefined(result = obj[key]) &&
-            (result = obj[key] = []);
+            (result = obj[key] = x);
         return result;
     };
 
