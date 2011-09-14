@@ -48,10 +48,10 @@
         // go through args; add to global/verb args registry
         if (!isUndefined(args))
             for (var arg in args)
-                getObjectForKey(targetRegistry.arg, arg)[id] = eventSignature;
+                getObjectForKey(getObjectForKey(targetRegistry, 'arg'), arg)[id] = eventSignature;
 
         // add to global verb events registry
-        getObjectForKey(targetRegistry.all, id) = eventSignature;
+        getObjectForKey(targetRegistry, 'all')[id] = eventSignature;
     };
 
     var fire = korevents['fire'] = function(options)
@@ -66,15 +66,17 @@
 
         // first, look at global subscribers to this verb
         var globalSubscribers = clone(getArrayForKey(byVerb, verb));
-        if (!isUndefined(args))
-            checkArgs(byArg, args, invalid, priority);
 
         // next, look at subject subscribers to the verb
         var subjectKey = getSubjectKey(subject);
         var subjectSubscribers = clone(getArrayForKey(getObjectForKey(bySubject, subjectKey), verb));
-        var subjectArgRegistry = getObjectForKey(getObjectForKey(bySubjectAndArg, subjectKey), verb);
+
         if (!isUndefined(args))
-            checkArgs(subjectArgRegistry, args, invalid, priority);
+        {
+            // check argument matching if we must
+            checkArgs(globalSubscribers, args, invalid, priority);
+            checkArgs(subjectSubscribers, args, invalid, priority);
+        }
 
         // join, sort
         var allSubscribers = globalSubscribers.concat(subjectSubscribers);
@@ -113,8 +115,9 @@
     };
 
 // helper
-    var checkArgs = function(byArg, args, invalid, priority)
+    var checkArgs = function(registry, args, invalid, priority)
     {
+        var byArg = registry.arg;
         for (var arg in args)
         {
             var argRegistry = byArg[arg],
