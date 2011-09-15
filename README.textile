@@ -31,7 +31,7 @@ The callback will be given a single argument, which looks a lot like the @option
 
 h3. kor.events.fire(options)
 
-Looks much like the options given on @listen@. The only difference is that a @callback@ is not given.
+Looks much like the options given on @listen@. The only difference is that a @callback@ and a @priority@ are not given.
 
 When the @callback@s of matching listeners are called, they can return @false@ to immediately halt any further event calls down the chain.
 
