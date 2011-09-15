@@ -67,8 +67,7 @@
             throw 'need to provide a verb at minimum!';
 
         // keep track of what registrations we've already determined won't fire.
-        var invalid = {},
-            priority = {};
+        var invalid = {};
 
         // first, grab the global subscribers to this verb
         var globalRegistry = byVerb[verb];
@@ -107,14 +106,7 @@
                 {
                     var subscriber = argSubscribers[i];
                     if (argValue !== subscriber['a'][arg])
-                    {
                         invalid[subscriber['i']] = true;
-                        continue;
-                    }
-
-                    if (isUndefined(priority[subscriber['i']]))
-                        priority[subscriber['i']] = 0;
-                    priority[subscriber['i']]++;
                 }
             }
         }
@@ -122,10 +114,13 @@
         // sort by priority
         subscribers.sort(function(a, b)
         {
+            var aPri = a['p'] || keyCount(a['a']),
+                bPri = b['p'] || keyCount(b['a']);
+
             var result;
-            if ((result = (a['p'] || 0) - (b['p'] || 0)) !== 0)
+            if ((result = (aPri - bPri)) !== 0)
                 return result;
-            return (priority[a['i']] || 0) - (priority[b['i']] || 0);
+            return a['i'] - b['i'];
         });
 
         // call on those that matched the filter
@@ -166,6 +161,18 @@
             for (var key in obj)
                 result.push(obj[key]);
 
+        return result;
+    };
+
+    // counts the number of keys an obj has
+    var keyCount = function(obj)
+    {
+        if (obj == null) // or undef
+            return 0;
+
+        var result = 0;
+        for (var key in obj)
+            result++;
         return result;
     };
 
