@@ -33,7 +33,7 @@ h3. kor.events.fire(options)
 
 Looks much like the options given on @listen@. The only difference is that a @callback@ and a @priority@ are not given.
 
-When the @callback@s of matching listeners are called, they can return @false@ to immediately halt any further event calls down the chain.
+When the callbacks of matching listeners are called, they can return @false@ to immediately halt any further event calls down the chain.
 
 *Returns* @true@ if all events were called successfully (even if none matched); @false@ if some listener returned false and halted the chain.
 
