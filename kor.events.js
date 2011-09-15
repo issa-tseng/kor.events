@@ -50,7 +50,7 @@
                 getObjectForKey(getObjectForKey(targetRegistrybyVerb, 'arg'), arg)[id] = eventSignature;
 
         // add to global verb events registry
-        getObjectForKey(targetRegistry, 'all')[id] = eventSignature;
+        getObjectForKey(targetRegistryByVerb, 'all')[id] = eventSignature;
 
         // give them a ticket number
         return id;
@@ -62,22 +62,30 @@
             verb = options['verb'],
             args = options['args'];
 
+        // basic validation
+        if (verb == null) // or undef
+            throw 'need to provide a verb at minimum!';
+
         // keep track of what registrations we've already determined won't fire.
         var invalid = {},
             priority = {};
 
         // first, grab the global subscribers to this verb
-        var globalRegistry = getObjectForKey(byVerb, verb);
+        var globalRegistry = byVerb[verb];
         var subscribers = getValues(globalRegistry['all']);
-var sys = require('sys');sys.puts(sys.inspect(globalRegistry));
+
         if (!isUndefined(args))
             var argRegistry = getValues(globalRegistry['arg']);
+
+        // make sure we have anything to talk about at all
+        if (subscribers.length === 0)
+            return true;
 
         // next, look at subject subscribers to the verb if necessary
         if (!isUndefined(subject))
         {
             var subjectKey = getSubjectKey(subject);
-            var subjectRegistry = getObjectForKey(getObjectForKey(bySubject, subjectKey), verb);
+            var subjectRegistry = (bySubject[subjectKey] || {})[verb];
             getValues(subjectRegistry['all'], subscribers);
 
             if (!isUndefined(args))
@@ -154,8 +162,11 @@ var sys = require('sys');sys.puts(sys.inspect(globalRegistry));
     {
         var result = arr || [];
 
-        for (var key in obj)
-            result.push(obj[key]);
+        if (obj != null) // or undef
+            for (var key in obj)
+                result.push(obj[key]);
+
+        return result;
     };
 
     // creates an object at the key if it does not exist;
