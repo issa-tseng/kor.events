@@ -8,9 +8,8 @@
 ;(function()
 {
 // internal data structures
-    var byVerb = { all: {}, arg: {} },
+    var byVerb = {},
         bySubject = {},
-        subjects = {},
         subjectSerialId = 0,
         eventSerialId = 0;
 
@@ -19,23 +18,21 @@
 
     korevents['listen'] = function(options)
     {
-        // pull out everything we might need up front
+        // pull out everything we need multiple times up front
         var subject = options['subject'],
             verb = options['verb'],
-            args = clone(options['args']),
-            priority = options['priority'],
-            callback = options['callback'];
+            args = options['args'],
 
-        // construct our own, just in case
-        var id = eventSerialId++;
-        var eventSignature = {
-            's': subject,
-            'v': verb,
-            'p': priority,
-            'a': args,
-            'i': id,
-            'c': callback
-        };
+        // construct our own event representation, in case
+            id = eventSerialId++,
+            eventSignature = {
+                's': subject,
+                'v': verb,
+                'p': options['priority'],
+                'a': args,
+                'i': id,
+                'c': options['callback']
+            };
 
         var targetRegistry;
         if (isUndefined(subject))
@@ -45,13 +42,18 @@
             // add to the subject-specific registry
             targetRegistry = getObjectForKey(bySubject, getSubjectKey(subject));
 
+        var targetRegistryByVerb = getObjectForKey(targetRegistry, verb);
+
         // go through args; add to global/verb args registry
         if (!isUndefined(args))
             for (var arg in args)
-                getObjectForKey(getObjectForKey(targetRegistry, 'arg'), arg)[id] = eventSignature;
+                getObjectForKey(getObjectForKey(targetRegistrybyVerb, 'arg'), arg)[id] = eventSignature;
 
         // add to global verb events registry
         getObjectForKey(targetRegistry, 'all')[id] = eventSignature;
+
+        // give them a ticket number
+        return id;
     };
 
     var fire = korevents['fire'] = function(options)
@@ -61,26 +63,56 @@
             args = options['args'];
 
         // keep track of what registrations we've already determined won't fire.
-        var invalid = {};
-        var priority = {};
+        var invalid = {},
+            priority = {};
 
-        // first, look at global subscribers to this verb
-        var globalSubscribers = clone(getArrayForKey(byVerb, verb));
-
-        // next, look at subject subscribers to the verb
-        var subjectKey = getSubjectKey(subject);
-        var subjectSubscribers = clone(getArrayForKey(getObjectForKey(bySubject, subjectKey), verb));
-
+        // first, grab the global subscribers to this verb
+        var globalRegistry = getObjectForKey(byVerb, verb);
+        var subscribers = getValues(globalRegistry['all']);
+var sys = require('sys');sys.puts(sys.inspect(globalRegistry));
         if (!isUndefined(args))
+            var argRegistry = getValues(globalRegistry['arg']);
+
+        // next, look at subject subscribers to the verb if necessary
+        if (!isUndefined(subject))
         {
-            // check argument matching if we must
-            checkArgs(globalSubscribers, args, invalid, priority);
-            checkArgs(subjectSubscribers, args, invalid, priority);
+            var subjectKey = getSubjectKey(subject);
+            var subjectRegistry = getObjectForKey(getObjectForKey(bySubject, subjectKey), verb);
+            getValues(subjectRegistry['all'], subscribers);
+
+            if (!isUndefined(args))
+                getValues(subjectRegistry['arg'], argRegistry);
         }
 
-        // join, sort
-        var allSubscribers = globalSubscribers.concat(subjectSubscribers);
-        allSubscribers.sort(function(a, b)
+        // now filter down the possible set to the matched set if necessary
+        if (!isUndefined(args))
+        {
+            for (var arg in args)
+            {
+                var argValue = args[arg],
+                    argSubscribers = argRegistry[arg];
+
+                if (isUndefined(argSubscribers))
+                    continue;
+
+                for (var i = 0; i < argSubscribers.length; i++)
+                {
+                    var subscriber = argSubscribers[i];
+                    if (argValue !== subscriber['a'][arg])
+                    {
+                        invalid[subscriber['i']] = true;
+                        continue;
+                    }
+
+                    if (isUndefined(priority[subscriber['i']]))
+                        priority[subscriber['i']] = 0;
+                    priority[subscriber['i']]++;
+                }
+            }
+        }
+
+        // sort by priority
+        subscribers.sort(function(a, b)
         {
             var result;
             if ((result = (a['p'] || 0) - (b['p'] || 0)) !== 0)
@@ -88,20 +120,18 @@
             return (priority[a['i']] || 0) - (priority[b['i']] || 0);
         });
 
-        // call
-        var result = true;
-        for (var i = 0; i < allSubscribers.length; i++)
+        // call on those that matched the filter
+        for (var i = 0; i < subscribers.length; i++)
         {
-            if (invalid[allSubscribers[i]['i']])
+            var subscriber = subscribers[i];
+
+            if (invalid[subscriber['i']])
                 continue;
 
-            if (allSubscribers[i]['c'](options) === false)
-            {
-                result = false;
-                break;
-            }
+            if (subscriber['c'](options) === false)
+                return false;
         }
-        return result;
+        return true;
     };
 
     korevents['derez'] = function(subject)
@@ -114,73 +144,27 @@
         delete byVerb[subject['i']];
     };
 
-// helper
-    var checkArgs = function(registry, args, invalid, priority)
-    {
-        var byArg = registry.arg;
-        for (var arg in args)
-        {
-            var argRegistry = byArg[arg],
-                argValue = args[arg];
-
-            if (!isUndefined(argRegistry))
-            {
-                for (var i = 0; i < argRegistry.length; i++)
-                {
-                    // check validity
-                    var registeredEvent = argRegistry[i];
-                    if (registeredEvent['a'][arg] !== argValue)
-                    {
-                        invalid[registeredEvent['i']] = true;
-                        continue;
-                    }
-
-                    // init and incr priority for this registry
-                    if (isUndefined(priority[registeredEvent['i']]))
-                        priority[registeredEvent['i']] = 0;
-                    priority[registeredEvent['i']]++;
-                }
-            }
-        }
-    };
-
 // utility
     var isUndefined = function(obj) { return obj === void 0; };
     var isArray = function(obj) { return toString.call(obj) === '[object Array]'; };
 
-    // shallow copies an obj/array
-    var clone = function(obj)
+    // gets the values of a hash as an array. can take
+    // an array to put the values into.
+    var getValues = function(obj, arr)
     {
-        if (isUndefined(obj))
-            return undefined;
-        if (isArray(obj))
-            return obj.slice();
+        var result = arr || [];
 
-        var result = {};
         for (var key in obj)
-            result[key] = obj[key];
-        return result;
+            result.push(obj[key]);
     };
 
     // creates an object at the key if it does not exist;
     // returns the object whether created or not.
     var getObjectForKey = function(obj, key)
     {
-        return getXForKey(obj, key, {});
-    };
-
-    // creates an array at the key if it does not exist;
-    // returns the array whether created or not.
-    var getArrayForKey = function(obj, key)
-    {
-        return getXForKey(obj, key, []);
-    };
-
-    var getXForKey = function(obj, key, x)
-    {
         var result;
         isUndefined(result = obj[key]) &&
-            (result = obj[key] = x);
+            (result = obj[key] = {});
         return result;
     };
 
