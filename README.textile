@@ -1,36 +1,51 @@
 h1. kor.events
 
-A little microframework for a couple of projects I'm working on. As with all my *kor.* projects, this is mostly something I'm writing for my own use and don't really intend to publicly support, but feel free to fork, update, and contribute anyway if you're feeling adventurous.
+A little microframework for a couple of projects I'm working on. It's based on some different ideas than pretty much every other Javascript eventing system I've seen out there. I'm not going to promise extreme browser support on this library, but given that it's all core Javascript datastructure manipulation, it should be just fine anywhere.
 
 h2. principles
 
 Essentially, the idea is to be able to subscribe to a global events system based on criteria matching, rather than being DOM- or object-based.
 
-Every event you can fire in the system consists of a *subject* (any JS object), a *verb* (a string indicating the action), and a hash that comprises additional specifiers (an *object*, if you will). You can subscribe to events based on matching criteria on any or all of the three; the only requirement is that you must specify a verb to listen to.
+Every event you can fire in the system consists of a *subject* (any JS object), a *verb* (a string indicating the action), and a hash that comprises additional specifiers (an *object*, if you will). You can listen on events based on matching criteria on any or all of the three; the only requirement is that you must specify a verb to listen to.
+
+If you choose to listen on additional specifiers (@args@ below), your listener will only get called if it exactly matches *all* specifiers.
+
+One further concept is that of *priority*. You can assign events with specific priorities if you'd like, but by default events will fire in an ordering determined by the number of @args@ that matched the criteria. The end result is that more specific listeners are fired first. For each @arg@ that matches, the priority of a listener is incremented by one. In the event of a tie, earlier-registered listeners are fired first.
 
 h2. syntax
 
 The system lives under the kor.events namespace. There are three primary methods associated with it:
 
-h3. @kor.events.listen(options)@
+h3. kor.events.listen(options)
 
-@options@ here consists of four potential arguments:
+@options@ here consists of five potential arguments:
 * @subject@: an object to listen to. Note that kor.events will add a @_kor_events_id@ key to the object for performance reasons. _(optional)_
 * @verb@: a string representing the type of action that was performed. _(required)_
 * @args@: a hash containing additional specifiers about the event to listen on. _(optional)_
+* @priority@: gives an explicit priority to the listener. _(optional)_
 * @callback@: the function to call back to when a matching event fires. _(required)_
 
 The callback will be given a single argument, which looks a lot like the @options@ hash, but will give all the criteria that the event firer specifies in relation to the event.
 
-h3. @kor.events.fire(options)@
+*Returns* a ticket ID you can use to unlisten to events later.
+
+h3. kor.events.fire(options)
 
 Looks much like the options given on @listen@. The only difference is that a @callback@ is not given.
 
-h3. @kor.events.derez(subject)@
+When the @callback@s of matching listeners are called, they can return @false@ to immediately halt any further event calls down the chain.
+
+*Returns* @true@ if all events were called successfully (even if none matched); @false@ if some listener returned false and halted the chain.
+
+h3. kor.events.derez(subject)
 
 Marks that the @subject@ is about to be eradicated. This does a couple of things:
 * Fires an event with @verb@ of @"derez"@ and @subject@ of the @subject@ so that any listeners that are tracking the object can know to clean up after it.
 * Removes the @subject@ from kor.events internal tracking.
+
+h3. kor.events.unlisten(id)
+
+Removes a listener from the registry. This can be done if you can't simply kill your callback function, and you need it to stop firing, or if you have a lot of events and worry about performance.
 
 h2. unit tests
 
