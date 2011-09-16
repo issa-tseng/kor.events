@@ -58,6 +58,9 @@
 
     var fire = korevents['fire'] = function(options)
     {
+        if (isUndefined(options))
+            throw 'need to provide options to fire on!';
+
         var subject = options['subject'],
             verb = options['verb'],
             args = options['args'];
