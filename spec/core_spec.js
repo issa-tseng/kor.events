@@ -12,7 +12,7 @@ describe('basic listening and firing', function()
         var flag = false;
 
         ke.listen({
-            verb: 'test-event',
+            verb: 'hit-test',
             callback: function()
             {
                 flag = true;
@@ -22,10 +22,74 @@ describe('basic listening and firing', function()
         expect(flag).toBeFalsy();
 
         ke.fire({
-            verb: 'test-event' 
+            verb: 'hit-test' 
         });
 
         expect(flag).toBeTruthy();
+    });
+
+    it('should not break if no listeners have appeared', function()
+    {
+        expect(function()
+        {
+            ke.fire({
+                verb: 'nobody-home-test'
+            });
+        }).not.toThrow();
+    });
+
+    it('should not fire if it is not listening to the verb', function()
+    {
+        var flag = false;
+
+        ke.listen({
+            verb: 'miss-test',
+            callback: function()
+            {
+                flag = true;
+            }
+        });
+
+        ke.fire({
+            verb: 'hit-test'
+        });
+
+        expect(flag).toBeFalsy();
+    });
+
+    it('should handle subscribing to a subject correctly given the same verb', function()
+    {
+        var isListeningFlag = false;
+        var isNotListeningFlag = false;
+
+        var subject = {};
+        var subject2 = {};
+
+        ke.listen({
+            verb: 'subject-test',
+            subject: subject,
+            callback: function()
+            {
+                isListeningFlag = true;
+            }
+        });
+
+        ke.listen({
+            verb: 'subject-test',
+            subject: subject2,
+            callback: function()
+            {
+                isNotListeningFlag = true;
+            }
+        });
+
+        ke.fire({
+            verb: 'subject-test',
+            subject: subject
+        });
+
+        expect(isListeningFlag).toBeTruthy();
+        expect(isNotListeningFlag).toBeFalsy();
     });
 });
 
