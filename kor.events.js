@@ -21,10 +21,10 @@
         // pull out everything we need multiple times up front
         var subject = options['subject'],
             verb = options['verb'],
-            args = options['args'],
+            args = options['args'];
 
         // construct our own event representation, in case
-            id = eventSerialId++,
+        var id = eventSerialId++,
             eventSignature = {
                 's': subject,
                 'v': verb,
@@ -76,10 +76,6 @@
         if (!isUndefined(args))
             var argRegistry = getValues(globalRegistry['arg']);
 
-        // make sure we have anything to talk about at all
-        if (subscribers.length === 0)
-            return true;
-
         // next, look at subject subscribers to the verb if necessary
         if (!isUndefined(subject))
         {
@@ -94,6 +90,10 @@
                     getValues(subjectRegistry['arg'], argRegistry);
             }
         }
+
+        // make sure we have anything to talk about at all
+        if (subscribers.length === 0)
+            return true;
 
         // now filter down the possible set to the matched set if necessary
         if (!isUndefined(args))
