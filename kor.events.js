@@ -70,7 +70,7 @@
         var invalid = {};
 
         // first, grab the global subscribers to this verb
-        var globalRegistry = byVerb[verb];
+        var globalRegistry = byVerb[verb] || {};
         var subscribers = getValues(globalRegistry['all']);
 
         if (!isUndefined(args))
@@ -85,10 +85,14 @@
         {
             var subjectKey = getSubjectKey(subject);
             var subjectRegistry = (bySubject[subjectKey] || {})[verb];
-            getValues(subjectRegistry['all'], subscribers);
 
-            if (!isUndefined(args))
-                getValues(subjectRegistry['arg'], argRegistry);
+            if (!isUndefined(subjectRegistry))
+            {
+                getValues(subjectRegistry['all'], subscribers);
+
+                if (!isUndefined(args))
+                    getValues(subjectRegistry['arg'], argRegistry);
+            }
         }
 
         // now filter down the possible set to the matched set if necessary
