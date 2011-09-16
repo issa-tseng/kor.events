@@ -147,9 +147,14 @@
         delete byVerb[subject['i']];
     };
 
+    korevents['clearAll'] = function()
+    {
+        byVerb = {};
+        bySubject = {};
+    };
+
 // utility
     var isUndefined = function(obj) { return obj === void 0; };
-    var isArray = function(obj) { return toString.call(obj) === '[object Array]'; };
 
     // gets the values of a hash as an array. can take
     // an array to put the values into.
