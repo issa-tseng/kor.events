@@ -2,6 +2,11 @@ var ke = require('../kor.events');
 
 describe('basic listening and firing', function()
 {
+    beforeEach(function()
+    {
+        ke.clearAll();
+    });
+
     it('should listen and fire a simple verb successfully', function()
     {
         var flag = false;
