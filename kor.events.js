@@ -40,7 +40,7 @@
             targetRegistry = byVerb;
         else
             // add to the subject-specific registry
-            targetRegistry = getObjectForKey(bySubject, getSubjectKey(subject));
+            targetRegistry = deepGet(true, bySubject, getSubjectKey(subject));
 
         var targetRegistryByVerb = targetRegistry[verb];
         if (isUndefined(targetRegistryByVerb))
@@ -49,7 +49,7 @@
         // go through args; add to global/verb args registry
         if (!isUndefined(args))
             for (var arg in args)
-                getObjectForKey(targetRegistryByVerb['arg'], arg)[id] = eventSignature;
+                deepGet(true, targetRegistryByVerb, 'arg', arg)[id] = eventSignature;
 
         // add to global verb events registry
         targetRegistryByVerb['all'][id] = eventSignature;
@@ -75,14 +75,14 @@
         var invalid = {};
 
         // first, grab the global subscribers to this verb
-        var globalRegistry = byVerb[verb] || {};
+        var globalRegistry = deepGet(byVerb, verb) || {};
         var subscribers = getValues(globalRegistry['all']);
 
         // next, look at subject subscribers to the verb if necessary
         if (!isUndefined(subject))
         {
             var subjectKey = getSubjectKey(subject);
-            var subjectRegistry = (bySubject[subjectKey] || {})[verb];
+            var subjectRegistry = deepGet(bySubject, subjectKey, verb);
 
             if (!isUndefined(subjectRegistry))
                 getValues(subjectRegistry['all'], subscribers);
@@ -182,14 +182,35 @@
         return result;
     };
 
-    // creates an object at the key if it does not exist;
-    // returns the object whether created or not.
-    var getObjectForKey = function(obj, key)
+    // goes to a deep location in an object. pass in true
+    // as the first arg to force creation of undefined
+    // objects on the way to your destination.
+    var deepGet = function(/* [create], obj, keys* */)
     {
-        var result;
-        isUndefined(result = obj[key]) &&
-            (result = obj[key] = {});
-        return result;
+        var idx = 0;
+        var create = false;
+
+        if (arguments[0] === true)
+        {
+            idx++;
+            create = true;
+        }
+
+        var obj = arguments[idx++];
+
+        for (; idx < arguments.length; idx++)
+        {
+            var key = arguments[idx];
+            if (isUndefined(obj[key]))
+                if (!create)
+                    return undefined;
+                else
+                    obj[key] = {};
+
+            obj = obj[key];
+        }
+
+        return obj;
     };
 
     // creates a subject key if it does not exist; returns
