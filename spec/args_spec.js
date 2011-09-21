@@ -72,5 +72,80 @@ describe('argument-based subscriptions', function()
         expect(correctValueFlag).toBeTruthy();
         expect(incorrectValueFlag).toBeFalsy();
     });
+
+    it('should filter on only registered arguments', function()
+    {
+        var correctValueFlag = false;
+        var incorrectValueFlag = false;
+
+        ke.listen({
+            verb: 'multi-arg-test',
+            args: {
+                argA: 'someValue',
+                argB: 'someOtherValue'
+            },
+            callback: function()
+            {
+                correctValueFlag = true;
+            }
+        });
+
+        ke.listen({
+            verb: 'multi-arg-test',
+            args: {
+                argA: 'someValue',
+                argB: 'someOtherValue',
+                argC: 'someThirdValue'
+            },
+            callback: function()
+            {
+                incorrectValueFlag = true;
+            }
+        });
+
+        ke.fire({
+            verb: 'multi-arg-test',
+            args: {
+                argA: 'someValue',
+                argB: 'someOtherValue',
+                argC: 'notAThirdValue'
+            }
+        });
+
+        expect(correctValueFlag).toBeTruthy();
+        expect(incorrectValueFlag).toBeFalsy();
+    });
+
+    it('should filter on all registered arguments', function()
+    {
+        var flag = false;
+
+        ke.listen({
+            verb: 'all-arg-test',
+            args: {
+                argA: 'someValue',
+                argB: 'someOtherValue'
+            },
+            callback: function()
+            {
+                flag = true;
+            }
+        });
+
+        ke.fire({
+            verb: 'all-arg-test'
+        });
+
+        expect(flag).toBeFalsy();
+
+        ke.fire({
+            verb: 'all-arg-test',
+            args: {
+                argA: 'someValue'
+            }
+        });
+
+        expect(flag).toBeFalsy();
+    });
 });
 
