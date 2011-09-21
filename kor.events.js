@@ -10,8 +10,7 @@
 // internal data structures
     var byVerb = {},
         bySubject = {},
-        subjectSerialId = 0,
-        eventSerialId = 0;
+        uuid = 0;
 
 // base object and methods
     var korevents = {};
@@ -24,7 +23,7 @@
             args = options['args'];
 
         // construct our own event representation, in case
-        var id = eventSerialId++,
+        var id = uuid++,
             eventSignature = {
                 's': subject,
                 'v': verb,
@@ -219,7 +218,7 @@
     {
         var result;
         isUndefined(result = subject['_kor_events_key']) &&
-            (result = subject['_kor_events_key'] = subjectSerialId++);
+            (result = subject['_kor_events_key'] = uuid++);
         return result;
     };
 
