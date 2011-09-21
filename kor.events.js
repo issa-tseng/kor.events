@@ -70,11 +70,11 @@
         if (verb == null) // or undef
             throw 'need to provide a verb at minimum!';
 
-        // keep track of valid matches per registration
+        // keep track of valid arg matches per registration
         var matches = {};
 
         // first, grab the global subscribers to this verb
-        var globalRegistry = deepGet(byVerb, verb) || {};
+        var globalRegistry = deepGet(byVerb, verb) || { 'all': {}, 'arg': {} };
         var subscribers = getValues(globalRegistry['all']);
 
         // next, look at subject subscribers to the verb if necessary
