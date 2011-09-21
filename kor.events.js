@@ -78,9 +78,6 @@
         var globalRegistry = byVerb[verb] || {};
         var subscribers = getValues(globalRegistry['all']);
 
-        if (!isUndefined(args))
-            var argRegistry = getValues(globalRegistry['arg']);
-
         // next, look at subject subscribers to the verb if necessary
         if (!isUndefined(subject))
         {
@@ -88,12 +85,7 @@
             var subjectRegistry = (bySubject[subjectKey] || {})[verb];
 
             if (!isUndefined(subjectRegistry))
-            {
                 getValues(subjectRegistry['all'], subscribers);
-
-                if (!isUndefined(args))
-                    getValues(subjectRegistry['arg'], argRegistry);
-            }
         }
 
         // make sure we have anything to talk about at all
@@ -106,10 +98,10 @@
             for (var arg in args)
             {
                 var argValue = args[arg],
-                    argSubscribers = argRegistry[arg];
+                    argSubscribers = getValues(globalRegistry['arg'][arg]);
 
-                if (isUndefined(argSubscribers))
-                    continue;
+                if (!isUndefined(subject))
+                    getValues(subjectRegistry['arg'][arg], argSubscribers);
 
                 for (var i = 0; i < argSubscribers.length; i++)
                 {
