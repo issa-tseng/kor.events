@@ -71,8 +71,8 @@
         if (verb == null) // or undef
             throw 'need to provide a verb at minimum!';
 
-        // keep track of what registrations we've already determined won't fire.
-        var invalid = {};
+        // keep track of valid matches per registration
+        var matches = {};
 
         // first, grab the global subscribers to this verb
         var globalRegistry = deepGet(byVerb, verb) || {};
@@ -106,8 +106,8 @@
                 for (var i = 0; i < argSubscribers.length; i++)
                 {
                     var subscriber = argSubscribers[i];
-                    if (argValue !== subscriber['a'][arg])
-                        invalid[subscriber['i']] = true;
+                    if (argValue === subscriber['a'][arg])
+                        matches[subscriber['i']] = (matches[subscriber['i']] || 0) + 1;
                 }
             }
         }
@@ -129,7 +129,7 @@
         {
             var subscriber = subscribers[i];
 
-            if (invalid[subscriber['i']])
+            if ((matches[subscriber['i']] || 0) < keyCount(subscriber['a']))
                 continue;
 
             if (subscriber['c'](options) === false)
