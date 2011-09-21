@@ -147,5 +147,49 @@ describe('argument-based subscriptions', function()
 
         expect(flag).toBeFalsy();
     });
+
+    it('should account for both subjects and arguments', function()
+    {
+        var correctSubjectFlag = false;
+        var incorrectSubjectFlag = false;
+
+        var subjectA = {};
+        var subjectB = {};
+
+        ke.listen({
+            verb: 'subject-arg-test',
+            subject: subjectA,
+            args: {
+                argA: 'someValue'
+            },
+            callback: function()
+            {
+                correctSubjectFlag = true;
+            }
+        });
+
+        ke.listen({
+            verb: 'subject-arg-test',
+            subject: subjectB,
+            args: {
+                argA: 'someValue'
+            },
+            callback: function()
+            {
+                incorrectSubjectFlag = true;
+            }
+        });
+
+        ke.fire({
+            verb: 'subject-arg-test',
+            subject: subjectA,
+            args: {
+                argA: 'someValue'
+            }
+        });
+
+        expect(correctSubjectFlag).toBeTruthy();
+        expect(incorrectSubjectFlag).toBeFalsy();
+    });
 });
 
