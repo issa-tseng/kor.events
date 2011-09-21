@@ -1,6 +1,6 @@
 var ke = require('../kor.events');
 
-describe('basic listening and firing', function()
+describe('argument-based subscriptions', function()
 {
     beforeEach(function()
     {
@@ -12,7 +12,7 @@ describe('basic listening and firing', function()
         var value;
 
         ke.listen({
-            verb: 'test-event2',
+            verb: 'pass-test',
             callback: function(options)
             {
                 value = (options.args || {}).testArg;
@@ -20,19 +20,57 @@ describe('basic listening and firing', function()
         });
 
         ke.fire({
-            verb: 'test-event2'
+            verb: 'pass-test'
         });
 
         expect(value).toBeUndefined();
 
         ke.fire({
-            verb: 'test-event2',
+            verb: 'pass-test',
             args: {
                 testArg: true
             }
         });
 
         expect(value).toBeTruthy();
+    });
+
+    it('should filter events based on provided arguments', function()
+    {
+        var correctValueFlag = false;
+        var incorrectValueFlag = false;
+
+        ke.listen({
+            verb: 'basic-arg-test',
+            args: {
+                someArg: 'someValue'
+            },
+            callback: function()
+            {
+                correctValueFlag = true;
+            }
+        });
+
+        ke.listen({
+            verb: 'basic-arg-test',
+            args: {
+                someArg: 'someOtherValue'
+            },
+            callback: function()
+            {
+                incorrectValueFlag = true;
+            }
+        });
+
+        ke.fire({
+            verb: 'basic-arg-test',
+            args: {
+                someArg: 'someValue'
+            }
+        });
+
+        expect(correctValueFlag).toBeTruthy();
+        expect(incorrectValueFlag).toBeFalsy();
     });
 });
 
