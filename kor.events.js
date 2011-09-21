@@ -42,15 +42,17 @@
             // add to the subject-specific registry
             targetRegistry = getObjectForKey(bySubject, getSubjectKey(subject));
 
-        var targetRegistryByVerb = getObjectForKey(targetRegistry, verb);
+        var targetRegistryByVerb = targetRegistry[verb];
+        if (isUndefined(targetRegistryByVerb))
+            targetRegistryByVerb = targetRegistry[verb] = { 'all': {}, 'arg': {} };
 
         // go through args; add to global/verb args registry
         if (!isUndefined(args))
             for (var arg in args)
-                getObjectForKey(getObjectForKey(targetRegistrybyVerb, 'arg'), arg)[id] = eventSignature;
+                getObjectForKey(targetRegistryByVerb['arg'], arg)[id] = eventSignature;
 
         // add to global verb events registry
-        getObjectForKey(targetRegistryByVerb, 'all')[id] = eventSignature;
+        targetRegistryByVerb['all'][id] = eventSignature;
 
         // give them a ticket number
         return id;
