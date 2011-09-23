@@ -140,8 +140,8 @@
     korevents['derez'] = function(subject)
     {
         var result = fire({
-            subject: subject,
-            verb: 'derez'
+            'subject': subject,
+            'verb': 'derez'
         });
 
         delete bySubject[getSubjectKey(subject)];
