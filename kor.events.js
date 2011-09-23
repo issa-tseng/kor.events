@@ -60,7 +60,7 @@
     var fire = korevents['fire'] = function(options)
     {
         if (isUndefined(options))
-            throw 'need to provide options to fire on!';
+            throw new Error('need to provide options to fire on!');
 
         var subject = options['subject'],
             verb = options['verb'],
@@ -68,7 +68,7 @@
 
         // basic validation
         if (verb == null) // or undef
-            throw 'need to provide a verb at minimum!';
+            throw new Error('need to provide a verb at minimum!');
 
         // keep track of valid arg matches per registration
         var matches = {};
