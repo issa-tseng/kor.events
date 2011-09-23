@@ -191,5 +191,27 @@ describe('argument-based subscriptions', function()
         expect(correctSubjectFlag).toBeTruthy();
         expect(incorrectSubjectFlag).toBeFalsy();
     });
+
+    it('should not break when no arguments have been registered', function()
+    {
+        var flag = false;
+
+        ke.listen({
+            verb: 'empty-test',
+            callback: function()
+            {
+                flag = true;
+            }
+        });
+
+        ke.fire({
+            verb: 'empty-test',
+            args: {
+                argA: 'some arg'
+            }
+        });
+
+        expect(flag).toBeTruthy();
+    });
 });
 
