@@ -117,8 +117,8 @@
             var aPri = a['p'] || keyCount(a['a']),
                 bPri = b['p'] || keyCount(b['a']);
 
-            var result;
-            if ((result = (aPri - bPri)) !== 0)
+            var result = bPri - aPri;
+            if (result !== 0)
                 return result;
             return a['i'] - b['i'];
         });
