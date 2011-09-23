@@ -1,31 +1,10 @@
 var ke = require('../kor.events');
 
-describe('basic listening and firing', function()
+describe('basic control flow', function()
 {
     beforeEach(function()
     {
         ke.clearAll();
-    });
-
-    it('should listen and fire a simple verb successfully', function()
-    {
-        var flag = false;
-
-        ke.listen({
-            verb: 'hit-test',
-            callback: function()
-            {
-                flag = true;
-            }
-        });
-
-        expect(flag).toBeFalsy();
-
-        ke.fire({
-            verb: 'hit-test' 
-        });
-
-        expect(flag).toBeTruthy();
     });
 
     it('should not break if no listeners have appeared', function()
@@ -51,12 +30,39 @@ describe('basic listening and firing', function()
         }).toThrow('need to provide a verb at minimum!');
     });
 
-    it('should not fire if it is not listening to the verb', function()
+    it('should return whether all callbacks fired without complaint', function()
+    {
+        expect(ke.fire({
+            verb: 'empty-verb'
+        })).toBeTruthy();
+
+        ke.listen({
+            verb: 'non-empty-verb',
+            callback: function()
+            {
+                return false;
+            }
+        });
+
+        expect(ke.fire({
+            verb: 'non-empty-verb'
+        })).toBeFalsy();
+    });
+
+    it('should halt the call chain if something returns falsy', function()
     {
         var flag = false;
 
         ke.listen({
-            verb: 'miss-test',
+            verb: 'chain-test',
+            callback: function()
+            {
+                return false;
+            }
+        });
+
+        ke.listen({
+            verb: 'chain-test',
             callback: function()
             {
                 flag = true;
@@ -64,11 +70,10 @@ describe('basic listening and firing', function()
         });
 
         ke.fire({
-            verb: 'hit-test'
+            verb: 'chain-test'
         });
 
         expect(flag).toBeFalsy();
     });
-
 });
 
