@@ -47,6 +47,12 @@ h3. kor.events.unlisten(id)
 
 Removes a listener from the registry. This can be done if you can't simply kill your callback function, and you need it to stop firing, or if you have a lot of events and worry about performance.
 
+*Returns* the original event options hash that was passed in to register the event.
+
+h3. kor.events.unlistenAll()
+
+Clears everything from the registry.
+
 h2. unit tests
 
 Get @jasmine-node@ from @npm@. Run @jasmine-node spec@.
