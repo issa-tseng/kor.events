@@ -218,9 +218,19 @@
     // the key whether created or not.
     var getSubjectKey = function(subject)
     {
-        var result;
-        isUndefined(result = subject['_kor_events_key']) &&
-            (result = subject['_kor_events_key'] = uuid++);
+        var result,
+            keKey = korevents['key'] || '_kor_events_key';
+
+        if (!isUndefined(subject['jquery']))
+        {
+            if (isUndefined(result = subject.data(keKey)))
+                subject.data(keKey, result = uuid++);
+        }
+        else
+        {
+            if (isUndefined(result = subject[keKey]))
+                result = subject[keKey] = uuid++;
+        }
         return result;
     };
 

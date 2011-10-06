@@ -131,5 +131,71 @@ describe('subject-based subscriptions', function()
         expect(subjectListenerFlag).toBeTruthy();
         expect(verbListenerFlag).toBeTruthy();
     });
+
+    it('should use data() to store id when it finds a jQuery obj subject', function()
+    {
+        var id, flag;
+
+        // poor man's jQuery mock
+        var subject = {
+            jquery: '1.6.1',
+            data: function(key, value)
+            {
+                if (typeof value == 'undefined')
+                {
+                    return id;
+                }
+                else
+                {
+                    id = value;
+                    return subject;
+                }
+            }
+        };
+
+        ke.listen({
+            verb: 'jquery-subject-test',
+            subject: subject,
+            callback: function()
+            {
+                flag = true;
+            }
+        });
+
+        expect(id).toBeDefined();
+
+        ke.fire({
+            verb: 'jquery-subject-test',
+            subject: subject
+        });
+
+        expect(flag).toBeTruthy();
+    });
+
+    it('should allow override of kor events subject key', function()
+    {
+        var flag;
+        var subject = {};
+
+        ke.key = 'test_key';
+
+        ke.listen({
+            verb: 'key-test',
+            subject: subject,
+            callback: function()
+            {
+                flag = true;
+            }
+        });
+
+        expect(subject.test_key).toBeDefined();
+
+        ke.fire({
+            verb: 'key-test',
+            subject: subject
+        });
+
+        expect(flag).toBeTruthy();
+    });
 });
 
