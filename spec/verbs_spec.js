@@ -4,7 +4,7 @@ describe('verb-based events', function()
 {
     beforeEach(function()
     {
-        ke.clearAll();
+        ke.unlistenAll();
     });
 
     it('should listen and fire a simple verb successfully', function()

@@ -10,6 +10,7 @@
 // internal data structures
     var byVerb = {},
         bySubject = {},
+        byEvent = {},
         uuid = 0;
 
 // base object and methods
@@ -52,6 +53,9 @@
 
         // add to global verb events registry
         targetRegistryByVerb['all'][id] = eventSignature;
+
+        // keep track of the event so that we can pull it up later
+        byEvent[id] = eventSignature;
 
         // give them a ticket number
         return id;
@@ -149,7 +153,30 @@
         return result;
     };
 
-    korevents['clearAll'] = function()
+    korevents['unlisten'] = function(eventId)
+    {
+        var eventSignature = byEvent[eventId];
+
+        if (isUndefined(eventSignature))
+            throw new Error('No event found by this id!');
+
+        var targetRegistry;
+        if (isUndefined(eventSignature['s']))
+            targetRegistry = byVerb[eventSignature['v']];
+        else
+            targetRegistry = bySubject[getSubjectKey(eventSignature['s'])][eventSignature['v']];
+
+        delete targetRegistry['all'][eventId];
+
+        for (var arg in eventSignature['args'])
+            delete targetRegistry['arg'][arg][id];
+
+        delete byEvent[eventId];
+
+        return eventSignature;
+    };
+
+    korevents['unlistenAll'] = function()
     {
         byVerb = {};
         bySubject = {};

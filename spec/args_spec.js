@@ -4,7 +4,7 @@ describe('argument-based subscriptions', function()
 {
     beforeEach(function()
     {
-        ke.clearAll();
+        ke.unlistenAll();
     });
 
     it('should pass through options correctly', function()

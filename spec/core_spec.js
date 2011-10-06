@@ -4,7 +4,7 @@ describe('basic control flow', function()
 {
     beforeEach(function()
     {
-        ke.clearAll();
+        ke.unlistenAll();
     });
 
     it('should not break if no listeners have appeared', function()

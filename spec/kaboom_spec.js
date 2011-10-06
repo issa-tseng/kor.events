@@ -4,10 +4,10 @@ describe('making things go away', function()
 {
     beforeEach(function()
     {
-        ke.clearAll();
+        ke.unlistenAll();
     });
 
-    it('should clear events when told to', function()
+    it('should unlisten all events when told to', function()
     {
         var flagA = false;
         var flagB = false;
@@ -31,7 +31,7 @@ describe('making things go away', function()
             }
         });
 
-        ke.clearAll();
+        ke.unlistenAll();
 
         ke.fire({
             verb: 'event-a'
@@ -84,6 +84,78 @@ describe('making things go away', function()
         ke.fire({
             verb: 'test-event',
             subject: subject
+        });
+
+        expect(flag).toBeFalsy();
+    });
+
+    it('should unlisten to a verb-based event properly', function()
+    {
+        var flag = false;
+
+        var id = ke.listen({
+            verb: 'unlisten-verb',
+            callback: function()
+            {
+                flag = true;
+            }
+        });
+
+        ke.unlisten(id);
+
+        ke.fire({
+            verb: 'unlisten-verb'
+        });
+
+        expect(flag).toBeFalsy();
+    });
+
+    it('should unlisten to a subject-based event properly', function()
+    {
+        var flag = false;
+        var subject = {};
+
+        var id = ke.listen({
+            verb: 'unlisten-subject',
+            subject: subject,
+            callback: function()
+            {
+                flag = true;
+            }
+        });
+
+        ke.unlisten(id);
+
+        ke.fire({
+            verb: 'unlisten-subject',
+            subject: subject
+        });
+
+        expect(flag).toBeFalsy();
+    });
+
+    it('should unlisten to a argument-based event properly', function()
+    {
+        var flag = false;
+
+        var id = ke.listen({
+            verb: 'unlisten-arg',
+            args: {
+              someArg: 'someValue'
+            },
+            callback: function()
+            {
+                flag = true;
+            }
+        });
+
+        ke.unlisten(id);
+
+        ke.fire({
+            verb: 'unlisten-arg',
+            args: {
+                someArg: 'someValue'
+            }
         });
 
         expect(flag).toBeFalsy();

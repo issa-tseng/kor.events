@@ -4,7 +4,7 @@ describe('subject-based subscriptions', function()
 {
     beforeEach(function()
     {
-        ke.clearAll();
+        ke.unlistenAll();
     });
 
     it('should be able to subscribe by subject', function()

@@ -4,7 +4,7 @@ describe('priority of calls', function()
 {
     beforeEach(function()
     {
-        ke.clearAll();
+        ke.unlistenAll();
 
         this.addMatchers({
             toBeOrdered: function()
