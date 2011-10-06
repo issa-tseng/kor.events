@@ -180,6 +180,7 @@
     {
         byVerb = {};
         bySubject = {};
+        byEvent = {};
     };
 
 // utility
