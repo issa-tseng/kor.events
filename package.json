@@ -1,0 +1,14 @@
+{
+  "name": "kor.events",
+  "version": "0.1.0",
+  "author": "Clint Tseng <clint@dontexplain.com>",
+  "description": "Criteria-based eventing library -- events without the objects",
+  "main": "./kor.events.min.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/clint-tseng/kor.events.git"
+  },
+  "keywords": [ "events", "criteria" ],
+  "devDependencies": [ "jasmine-node" ],
+  "license": "WTFPL"
+}
