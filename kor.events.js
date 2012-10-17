@@ -276,7 +276,7 @@
         // otherwise, install ourselves in kor.events in the root namespace
         var kor = root['kor'];
         if (isUndefined(kor))
-            root['kor'] = {};
+            kor = root['kor'] = {};
 
         kor['events'] = korevents;
     }
